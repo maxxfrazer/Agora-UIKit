@@ -19,7 +19,6 @@ Use this Pod to create a video UIKit view that can be easily added to your appli
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Max Cobb' => 'max@agora.io' }
   s.source           = { :git => 'https://github.com/maxxfrazer/Agora-UIKit.git', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '13.0'
 

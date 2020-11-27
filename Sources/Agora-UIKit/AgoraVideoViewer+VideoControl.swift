@@ -12,7 +12,7 @@ extension AgoraVideoViewer {
     /// Setup the canvas and rendering for the device's local video
     func setupAgoraVideo() {
         if self.agkit.enableVideo() < 0 {
-            print("Could not enable video")
+            AgoraVideoViewer.agoraPrint(.error, message: "Could not enable video")
             return
         }
     }

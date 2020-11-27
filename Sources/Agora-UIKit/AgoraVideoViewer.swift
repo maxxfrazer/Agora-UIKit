@@ -23,12 +23,27 @@ public struct AgoraConnectionData {
 
 open class AgoraVideoViewer: UIView {
 
-    public enum Style {
+    public enum Style: Equatable {
         case grid
+        case floating
         case custom(customFunction: (AgoraVideoViewer, EnumeratedSequence<[UInt: AgoraSingleVideoView]>, Int) -> Void)
+
+        public static func ==(lhs: AgoraVideoViewer.Style, rhs: AgoraVideoViewer.Style) -> Bool {
+            switch (lhs, rhs) {
+            case (.grid, .grid), (.floating, .floating):
+                return true
+            default:
+                return false
+            }
+        }
     }
 
     internal var parentViewController: UIViewController?
+    public internal(set) var activeSpeaker: UInt? {
+        didSet {
+            self.reorganiseVideos()
+        }
+    }
 
     /// Setting to zero will tell Agora to assign one for you
     lazy var userID: UInt = 0
@@ -45,12 +60,31 @@ open class AgoraVideoViewer: UIView {
         set { self.connectionData.appToken = newValue }
     }
 
-    lazy var userVideoHolder: UIView = {
+    lazy var floatingVideoHolder: UICollectionView = {
+
+        let collView = AgoraCollectionViewer()
+        self.addSubview(collView)
+        collView.translatesAutoresizingMaskIntoConstraints = false
+        [
+            collView.widthAnchor.constraint(equalTo: self.safeAreaLayoutGuide.widthAnchor),
+            collView.heightAnchor.constraint(greaterThanOrEqualToConstant: 100 + 2 * AgoraCollectionViewer.cellSpacing),
+            collView.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor),
+            collView.centerXAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerXAnchor)
+        ].forEach { $0.isActive = true }
+        self.bringSubviewToFront(collView)
+        collView.delegate = self
+        collView.dataSource = self
+        return collView
+    }()
+
+    lazy var backgroundVideoHolder: UIView = {
         let rtnView = UIView()
         self.addSubview(rtnView)
         rtnView.translatesAutoresizingMaskIntoConstraints = false
-        rtnView.widthAnchor.constraint(equalTo: self.widthAnchor).isActive = true
-        rtnView.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
+        [
+            rtnView.widthAnchor.constraint(equalTo: self.widthAnchor),
+            rtnView.heightAnchor.constraint(equalTo: self.heightAnchor)
+        ].forEach { $0.isActive = true }
         self.sendSubviewToBack(rtnView)
         return rtnView
     }()
@@ -60,12 +94,20 @@ open class AgoraVideoViewer: UIView {
             withAppId: connectionData.appId,
             delegate: self
         )
+        engine.enableAudioVolumeIndication(1000, smooth: 3, report_vad: true)
         engine.setChannelProfile(.liveBroadcasting)
         engine.setClientRole(self.userRole)
         return engine
     }()
 
-    var style: AgoraVideoViewer.Style
+    public var style: AgoraVideoViewer.Style {
+        didSet {
+            if oldValue != self.style {
+                AgoraVideoViewer.agoraPrint(.info, message: "changed style")
+                self.reorganiseVideos()
+            }
+        }
+    }
 
     public init(connectionData: AgoraConnectionData, viewController: UIViewController, style: AgoraVideoViewer.Style = .grid) {
         self.connectionData = connectionData
@@ -95,10 +137,8 @@ open class AgoraVideoViewer: UIView {
     public func fills(view: UIView) {
         view.addSubview(self)
         self.translatesAutoresizingMaskIntoConstraints = false
-        self.safeAreaLayoutGuide.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor).isActive = true
-        self.safeAreaLayoutGuide.heightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.heightAnchor).isActive = true
-        self.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
-        self.heightAnchor.constraint(equalTo: view.heightAnchor).isActive = true
+        self.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor).isActive = true
+        self.heightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.heightAnchor).isActive = true
     }
 
     var controlContainer: UIView?
@@ -149,6 +189,14 @@ open class AgoraVideoViewer: UIView {
         userSingleView.canvas.view = nil
         canView.removeFromSuperview()
         self.userVideoLookup.removeValue(forKey: userId)
-    }
+        if let activeSpeaker = self.activeSpeaker, activeSpeaker == userId {
+            if let randomNotMe = self.userVideoLookup.keys.shuffled().filter({ $0 != self.userID }).randomElement() {
+                // active speaker has left, reassign activeSpeaker to a random member
+                self.activeSpeaker = randomNotMe
+            } else {
+                self.activeSpeaker = nil
+            }
+        }
 
+    }
 }

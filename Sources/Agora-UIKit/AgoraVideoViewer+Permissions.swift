@@ -66,9 +66,7 @@ extension AgoraVideoViewer {
         UIApplication.shared.open(
             URL(string: UIApplication.openSettingsURLString)!,
             options: [:]
-        ) { isTrue in
-            print("something returned isTrue: \(isTrue)")
-        }
+        )
     }
 
     static func errorVibe() {

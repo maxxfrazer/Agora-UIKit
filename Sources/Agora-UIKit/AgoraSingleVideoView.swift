@@ -21,7 +21,10 @@ public class AgoraSingleVideoView: UIView {
             self.mutedFlag.isHidden = !audioMuted
         }
     }
-
+    var uid: UInt {
+        get { self.canvas.uid }
+        set { self.canvas.uid = newValue }
+    }
     var canvas: AgoraRtcVideoCanvas
     var hostingView: UIView? {
         self.canvas.view

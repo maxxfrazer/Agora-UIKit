@@ -13,11 +13,17 @@ extension AgoraVideoViewer {
         switch self.style {
         case .grid:
             self.organiseGrid()
+            self.floatingVideoHolder.reloadData()
+        case .floating:
+            self.floatingVideoHolder.reloadData()
         case .custom(let orgCustom):
             // no custom setup yet
             orgCustom(self, self.userVideoLookup.enumerated(), self.userVideoLookup.count)
             break
         }
+    }
+    func organiseFloating() {
+        self.floatingVideoHolder.reloadData()
     }
     func organiseGrid() {
         var prevView: UIView?
@@ -27,7 +33,7 @@ extension AgoraVideoViewer {
             // when there are 2 videos we display them ontop of eachother
             for (_, videoSessionView) in userVideoLookup {
                 videoSessionView.removeFromSuperview()
-                self.userVideoHolder.addSubview(videoSessionView)
+                self.backgroundVideoHolder.addSubview(videoSessionView)
                 videoSessionView.translatesAutoresizingMaskIntoConstraints = false
                 [
                     // Set the width and height the same as the full area
@@ -58,7 +64,7 @@ extension AgoraVideoViewer {
 
             // clear the constraints.
             videoSessionView.removeFromSuperview()
-            self.userVideoHolder.addSubview(videoSessionView)
+            self.backgroundVideoHolder.addSubview(videoSessionView)
             videoSessionView.translatesAutoresizingMaskIntoConstraints = false
             [
                 // Set the width and height the same as the full area

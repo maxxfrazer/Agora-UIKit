@@ -51,6 +51,9 @@ extension AgoraVideoViewer: AgoraRtcEngineDelegate {
                 videoView.audioMuted = state == .stopped
             } else if state != .stopped {
                 self.addUserVideo(with: uid, size: .zero).audioMuted = false
+                if self.activeSpeaker == nil && uid != self.userID {
+                    self.activeSpeaker = uid
+                }
             }
         }
     }
@@ -73,16 +76,17 @@ extension AgoraVideoViewer: AgoraRtcEngineDelegate {
         }
     }
 
+    open func rtcEngine(_ engine: AgoraRtcEngineKit, activeSpeaker speakerUid: UInt) {
+        self.activeSpeaker = speakerUid
+    }
+
     open func rtcEngine(_ engine: AgoraRtcEngineKit, remoteVideoStateChangedOfUid uid: UInt, state: AgoraVideoRemoteState, reason: AgoraVideoRemoteStateReason, elapsed: Int) {
-//        if state == .stopped {
-//            self.removeUserVideo(with: uid)
-//        }
-        if state == .starting {
-            print("starting \(uid)")
-        }
         switch state {
         case .decoding:
             self.userVideoLookup[uid]?.videoMuted = false
+            if self.activeSpeaker == nil && uid != self.userID {
+                self.activeSpeaker = uid
+            }
         case .stopped:
             self.userVideoLookup[uid]?.videoMuted = true
         default:
@@ -95,13 +99,12 @@ extension AgoraVideoViewer: AgoraRtcEngineDelegate {
         case .capturing, .stopped:
             self.userVideoLookup[self.userID]?.videoMuted = state == .stopped
         default:
-            print(state)
+            break
         }
     }
 
     /// - TODO: See why this isn't called.
     open func rtcEngine(_ engine: AgoraRtcEngineKit, localAudioStateChange state: AgoraAudioLocalState, error: AgoraAudioLocalError) {
-        print("local user set Audio: \(state)")
         switch state {
         case .recording, .stopped:
             self.userVideoLookup[self.userID]?.audioMuted = state == .stopped
@@ -115,7 +118,6 @@ extension AgoraVideoViewer: AgoraRtcEngineDelegate {
     }
 
     open func rtcEngine(_ engine: AgoraRtcEngineKit, didVideoMuted muted: Bool, byUid uid: UInt) {
-        print("remote user with uid: \(uid), set Video Muted: \(muted)")
         self.userVideoLookup[self.userID]?.audioMuted = muted
     }
 

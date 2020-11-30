@@ -9,7 +9,11 @@
 // Camera + Microphone permissions.
 
 import AVFoundation
+#if os(iOS)
 import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
 extension AgoraVideoViewer {
     public func checkForPermissions(callback: @escaping (() -> Void)) -> Bool {
@@ -63,19 +67,28 @@ extension AgoraVideoViewer {
     }
 
     static func goToSettingsPage() {
+        #if os(macOS)
+        NSWorkspace.shared.open(URL(fileURLWithPath: "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera"))
+        #else
         UIApplication.shared.open(
             URL(string: UIApplication.openSettingsURLString)!,
             options: [:]
         )
+        #endif
     }
 
     static func errorVibe() {
+        #if os(macOS)
+        return
+        #else
         let notificationFeedbackGenerator = UINotificationFeedbackGenerator()
         notificationFeedbackGenerator.prepare()
         notificationFeedbackGenerator.notificationOccurred(.error)
+        #endif
     }
 
     func cameraMicSessingsPopup(successHandler: @escaping () -> Void) {
+        #if os(iOS)
         let alertView = UIAlertController(
             title: "Camera and Microphone",
             message: "To become a host, you must enable the microphone and camera",
@@ -90,5 +103,18 @@ extension AgoraVideoViewer {
         DispatchQueue.main.async {
             self.parentViewController?.present(alertView, animated: true)
         }
+        #else
+        let alertView = NSAlert()
+        alertView.messageText = "Camera and Microphone"
+        alertView.informativeText = "To become a host, you must enable the microphone and camera"
+        alertView.addButton(withTitle: "OK")
+        alertView.addButton(withTitle: "Cancel")
+        let res = alertView.runModal()
+        if res == .alertSecondButtonReturn {
+            successHandler()
+        } else {
+            AgoraVideoViewer.errorVibe()
+        }
+        #endif
     }
 }

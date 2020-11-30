@@ -26,7 +26,7 @@ extension AgoraVideoViewer {
         self.floatingVideoHolder.reloadData()
     }
     func organiseGrid() {
-        var prevView: UIView?
+        var prevView: MPView?
         if userVideoLookup.isEmpty {
             return
         } else if userVideoLookup.count == 2 {
@@ -35,6 +35,7 @@ extension AgoraVideoViewer {
                 videoSessionView.removeFromSuperview()
                 self.backgroundVideoHolder.addSubview(videoSessionView)
                 videoSessionView.translatesAutoresizingMaskIntoConstraints = false
+                #if os(iOS)
                 [
                     // Set the width and height the same as the full area
                     // Multiplied by the precalculated multiplier
@@ -45,11 +46,26 @@ extension AgoraVideoViewer {
                         multiplier: 0.5
                     ), videoSessionView.leadingAnchor.constraint(
                         equalTo: self.superview!.safeAreaLayoutGuide.leadingAnchor
+                    ), videoSessionView.topAnchor.constraint(
+                        equalTo: prevView?.bottomAnchor ?? self.superview!.safeAreaLayoutGuide.topAnchor
                     )
                 ].forEach { $0.isActive = true }
-                videoSessionView.topAnchor.constraint(
-                    equalTo: prevView?.bottomAnchor ?? self.superview!.safeAreaLayoutGuide.topAnchor
-                ).isActive = true
+                #else
+                [
+                    // Set the width and height the same as the full area
+                    // Multiplied by the precalculated multiplier
+                    videoSessionView.widthAnchor.constraint(
+                        equalTo: self.superview!.widthAnchor
+                    ), videoSessionView.heightAnchor.constraint(
+                        equalTo: self.superview!.heightAnchor,
+                        multiplier: 0.5
+                    ), videoSessionView.leadingAnchor.constraint(
+                        equalTo: self.superview!.leadingAnchor
+                    ), videoSessionView.topAnchor.constraint(
+                        equalTo: prevView?.bottomAnchor ?? self.superview!.topAnchor
+                    )
+                ].forEach { $0.isActive = true }
+                #endif
                 prevView = videoSessionView
             }
             return
@@ -66,6 +82,7 @@ extension AgoraVideoViewer {
             videoSessionView.removeFromSuperview()
             self.backgroundVideoHolder.addSubview(videoSessionView)
             videoSessionView.translatesAutoresizingMaskIntoConstraints = false
+            #if os(iOS)
             [
                 // Set the width and height the same as the full area
                 // Multiplied by the precalculated multiplier
@@ -77,17 +94,45 @@ extension AgoraVideoViewer {
                     multiplier: multDim
                 )
             ].forEach { $0.isActive = true }
+            #else
+            [
+                // Set the width and height the same as the full area
+                // Multiplied by the precalculated multiplier
+                videoSessionView.widthAnchor.constraint(
+                    equalTo: self.superview!.widthAnchor,
+                    multiplier: multDim
+                ), videoSessionView.heightAnchor.constraint(
+                    equalTo: self.superview!.heightAnchor,
+                    multiplier: multDim
+                )
+            ].forEach { $0.isActive = true }
+            #endif
             if idx == 0 {
                 // First video in the list, so just put it at the top left
+                #if os(iOS)
                 [
                     videoSessionView.leftAnchor.constraint(equalTo: self.superview!.safeAreaLayoutGuide.leftAnchor),
                     videoSessionView.topAnchor.constraint(equalTo: self.superview!.safeAreaLayoutGuide.topAnchor)
                 ].forEach { $0.isActive = true }
+                #else
+                [
+                    videoSessionView.leftAnchor.constraint(equalTo: self.superview!.leftAnchor),
+                    videoSessionView.topAnchor.constraint(equalTo: self.superview!.topAnchor)
+                ].forEach { $0.isActive = true }
+                #endif
             } else {
                 if (idx % Int(maxSqrt)) == 0 {
                     // New row, so go to the far left, and align the top of this
                     // view with the bottom of the previous view.
-                    videoSessionView.leftAnchor.constraint(equalTo: self.superview!.safeAreaLayoutGuide.leftAnchor).isActive = true
+                    #if os(iOS)
+                    videoSessionView.leftAnchor.constraint(
+                        equalTo: self.superview!.safeAreaLayoutGuide.leftAnchor
+                    ).isActive = true
+                    #else
+                    videoSessionView.leftAnchor.constraint(
+                        equalTo: self.superview!.leftAnchor
+                    ).isActive = true
+                    #endif
                     videoSessionView.topAnchor.constraint(equalTo: prevView!.bottomAnchor).isActive = true
                 } else {
                     // Go to the end of current row

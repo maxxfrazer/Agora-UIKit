@@ -5,9 +5,13 @@
 //  Created by Max Cobb on 25/11/2020.
 //
 
+#if os(iOS)
 import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
-// This file mostly contains programatically created UIButtons,
+// This file mostly contains programatically created MPButtons,
 // The buttons call the following methods found in AgoraVideoViewer+VideoControl.swift:
 // leaveChannel, toggleCam, toggleMic, flipCamera, toggleBroadcast, toggleBeautify
 
@@ -38,68 +42,92 @@ extension AgoraVideoViewer {
                 button.widthAnchor.constraint(equalToConstant: buttonSize),
                 button.heightAnchor.constraint(equalToConstant: buttonSize),
             ].forEach { $0.isActive = true }
+            #if os(iOS)
             button.layer.cornerRadius = buttonSize / 2
             button.backgroundColor = .systemGray
+            #else
+            button.layer?.cornerRadius = buttonSize / 2
+            button.layer?.backgroundColor = NSColor.systemGray.cgColor
+            #endif
         })
     }
 
-    func getControlContainer() -> UIView {
+    func getControlContainer() -> MPView {
         if let controlContainer = self.controlContainer {
             return controlContainer
         }
-        let container = UIView()
+        let container = MPView()
         self.addSubview(container)
 
         container.translatesAutoresizingMaskIntoConstraints = false
         [
             container.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            container.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor),
             container.widthAnchor.constraint(equalTo: self.widthAnchor),
             container.heightAnchor.constraint(equalTo: self.heightAnchor)
         ].forEach { $0.isActive = true }
-
+        #if os(iOS)
+        container.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor).isActive = true
         container.isUserInteractionEnabled = true
+        #else
+        container.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        #endif
+
         self.controlContainer = container
         return container
     }
 
-    func getCameraButton() -> UIButton? {
+    func getCameraButton() -> MPButton? {
         if let camButton = self.camButton { return camButton }
 
-        let button = UIButton.newToggleButton(unselected: "video", selected: "video.slash")
+        let button = MPButton.newToggleButton(unselected: "video", selected: "video.slash")
+        #if os(iOS)
         button.addTarget(self, action: #selector(toggleCam), for: .touchUpInside)
+        #else
+        button.action = #selector(toggleCam)
+        #endif
 
         self.camButton = button
         return button
     }
 
-    func getMicButton() -> UIButton? {
+    func getMicButton() -> MPButton? {
         if let micButton = self.micButton { return micButton }
 
-        let button = UIButton.newToggleButton(
+        let button = MPButton.newToggleButton(
             unselected: "mic", selected: "mic.slash"
         )
+        #if os(iOS)
         button.addTarget(self, action: #selector(toggleMic), for: .touchUpInside)
+        #else
+        button.action = #selector(toggleMic)
+        #endif
 
         self.micButton = button
         return button
     }
 
-    func getFlipButton() -> UIButton? {
+    func getFlipButton() -> MPButton? {
         if let flipButton = self.flipButton { return flipButton }
-
-        let button = UIButton.newToggleButton(unselected: "camera.rotate")
+        #if os(macOS)
+        return nil
+        #else
+        let button = MPButton.newToggleButton(unselected: "camera.rotate")
         button.addTarget(self, action: #selector(flipCamera), for: .touchUpInside)
 
         self.flipButton = button
         return button
+        #endif
     }
 
-    func getBeautifyButton() -> UIButton? {
+    func getBeautifyButton() -> MPButton? {
         if let beautyButton = self.beautyButton { return beautyButton }
 
-        let button = UIButton.newToggleButton(unselected: "wand.and.stars.inverse")
+        let button = MPButton.newToggleButton(unselected: "wand.and.stars.inverse")
+        #if os(iOS)
         button.addTarget(self, action: #selector(toggleBeautify), for: .touchUpInside)
+        #else
+        button.action = #selector(toggleBeautify)
+        #endif
 
         self.beautyButton = button
         return button

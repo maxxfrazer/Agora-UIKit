@@ -5,7 +5,19 @@
 //  Created by Max Cobb on 25/11/2020.
 //
 
+#if os(iOS)
 import UIKit
+public typealias MPButton=UIButton
+public typealias MPImage=UIImage
+public typealias MPView = UIView
+public typealias MPViewController = UIViewController
+#elseif os(macOS)
+import AppKit
+public typealias MPButton=NSButton
+public typealias MPImage=NSImage
+public typealias MPView = NSView
+public typealias MPViewController = NSViewController
+#endif
 import AgoraRtcKit
 
 
@@ -21,7 +33,7 @@ public struct AgoraConnectionData {
     }
 }
 
-open class AgoraVideoViewer: UIView {
+open class AgoraVideoViewer: MPView {
 
     public enum Style: Equatable {
         case grid
@@ -38,7 +50,7 @@ open class AgoraVideoViewer: UIView {
         }
     }
 
-    internal var parentViewController: UIViewController?
+    internal var parentViewController: MPViewController?
     public internal(set) var activeSpeaker: UInt? {
         didSet {
             self.reorganiseVideos()
@@ -68,11 +80,20 @@ open class AgoraVideoViewer: UIView {
         set { self.connectionData.appToken = newValue }
     }
 
-    lazy var floatingVideoHolder: UICollectionView = {
+    lazy var floatingVideoHolder: MPCollectionView = {
 
         let collView = AgoraCollectionViewer()
         self.addSubview(collView)
         collView.translatesAutoresizingMaskIntoConstraints = false
+        #if os(macOS)
+        [
+            collView.widthAnchor.constraint(equalTo: self.widthAnchor),
+            collView.heightAnchor.constraint(greaterThanOrEqualToConstant: 100 + 2 * AgoraCollectionViewer.cellSpacing),
+            collView.topAnchor.constraint(equalTo: self.topAnchor),
+            collView.centerXAnchor.constraint(equalTo: self.centerXAnchor)
+        ].forEach { $0.isActive = true }
+        self.addSubview(collView, positioned: .above, relativeTo: nil)
+        #else
         [
             collView.widthAnchor.constraint(equalTo: self.safeAreaLayoutGuide.widthAnchor),
             collView.heightAnchor.constraint(greaterThanOrEqualToConstant: 100 + 2 * AgoraCollectionViewer.cellSpacing),
@@ -80,20 +101,25 @@ open class AgoraVideoViewer: UIView {
             collView.centerXAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerXAnchor)
         ].forEach { $0.isActive = true }
         self.bringSubviewToFront(collView)
+        #endif
         collView.delegate = self
         collView.dataSource = self
         return collView
     }()
 
-    lazy var backgroundVideoHolder: UIView = {
-        let rtnView = UIView()
+    lazy var backgroundVideoHolder: MPView = {
+        let rtnView = MPView()
+        #if os(macOS)
+        self.addSubview(rtnView, positioned: .below, relativeTo: nil)
+        #else
         self.addSubview(rtnView)
+        self.sendSubviewToBack(rtnView)
+        #endif
         rtnView.translatesAutoresizingMaskIntoConstraints = false
         [
             rtnView.widthAnchor.constraint(equalTo: self.widthAnchor),
             rtnView.heightAnchor.constraint(equalTo: self.heightAnchor)
         ].forEach { $0.isActive = true }
-        self.sendSubviewToBack(rtnView)
         return rtnView
     }()
 
@@ -117,7 +143,7 @@ open class AgoraVideoViewer: UIView {
         }
     }
 
-    public init(connectionData: AgoraConnectionData, viewController: UIViewController, style: AgoraVideoViewer.Style = .grid) {
+    public init(connectionData: AgoraConnectionData, viewController: MPViewController, style: AgoraVideoViewer.Style = .grid) {
         self.connectionData = connectionData
         self.parentViewController = viewController
         self.style = style
@@ -130,8 +156,8 @@ open class AgoraVideoViewer: UIView {
     }
 
 
-    lazy var videoView: UIView = {
-        let vview = UIView()
+    lazy var videoView: MPView = {
+        let vview = MPView()
         vview.translatesAutoresizingMaskIntoConstraints = false
         return vview
     }()
@@ -142,18 +168,23 @@ open class AgoraVideoViewer: UIView {
         }
     }
 
-    public func fills(view: UIView) {
+    public func fills(view: MPView) {
         view.addSubview(self)
         self.translatesAutoresizingMaskIntoConstraints = false
+        #if os(macOS)
+        self.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
+        self.heightAnchor.constraint(equalTo: view.heightAnchor).isActive = true
+        #else
         self.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor).isActive = true
         self.heightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.heightAnchor).isActive = true
+        #endif
     }
 
-    var controlContainer: UIView?
-    var camButton: UIButton?
-    var micButton: UIButton?
-    var flipButton: UIButton?
-    var beautyButton: UIButton?
+    var controlContainer: MPView?
+    var camButton: MPButton?
+    var micButton: MPButton?
+    var flipButton: MPButton?
+    var beautyButton: MPButton?
 
     var beautyOptions: AgoraBeautyOptions = {
         let bOpt = AgoraBeautyOptions()

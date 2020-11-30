@@ -1,30 +1,47 @@
 //
-//  UIButton+Extensions.swift
+//  MPButton+Extensions.swift
 //  Agora-UIKit
 //
 //  Created by Max Cobb on 25/11/2020.
 //
 
+#if os(iOS)
 import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
-internal extension UIButton {
-    /// Create a custom UIButton made up of one or two SF Symbol images to alternate between
+internal extension MPButton {
+    /// Create a custom UI/NSButton made up of one or two SF Symbol images to alternate between
     /// - Parameters:
     ///   - unselected: SF Symbol present by default, when button has not yet been selected
     ///   - selected: SF Symbol to be displayed after the button is selected
-    /// - Returns: A new UIButton of type `.custom` which will alternate between the given SF Symbols on selecting
-    static func newToggleButton(unselected: String, selected: String? = nil) -> UIButton {
-        let button = UIButton(type: .custom)
+    /// - Returns: A new MPButton of type `.custom` which will alternate between the given SF Symbols on selecting
+    static func newToggleButton(unselected: String, selected: String? = nil) -> MPButton {
+        #if os(iOS)
+        let button = MPButton(type: .custom)
+        #else
+        let button = MPButton()
+        button.wantsLayer = true
+        #endif
         if let selected = selected {
-            button.setImage(UIImage(
+            #if os(iOS)
+            button.setImage(MPImage(
                 systemName: selected,
-                withConfiguration: UIImage.SymbolConfiguration(scale: .large)
+                withConfiguration: MPImage.SymbolConfiguration(scale: .large)
             ), for: .selected)
+            #else
+            button.title = selected
+            #endif
         }
-        button.setImage(UIImage(
+        #if os(iOS)
+        button.setImage(MPImage(
             systemName: unselected,
-            withConfiguration: UIImage.SymbolConfiguration(scale: .large)
+            withConfiguration: MPImage.SymbolConfiguration(scale: .large)
         ), for: .normal)
+        #else
+        button.title = unselected
+        #endif
         return button
     }
 }

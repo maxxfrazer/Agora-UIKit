@@ -22,9 +22,16 @@ extension AgoraVideoViewer {
         guard let camButton = self.getCameraButton() else {
             return
         }
+        #if os(iOS)
         camButton.isSelected.toggle()
         camButton.backgroundColor = camButton.isSelected ? .systemRed : .systemGray
         self.agkit.enableLocalVideo(!camButton.isSelected)
+        #else
+        camButton.isHighlighted.toggle()
+        camButton.layer?.backgroundColor = camButton.isHighlighted ?
+            NSColor.systemRed.cgColor : NSColor.systemGray.cgColor
+        self.agkit.enableLocalVideo(!camButton.isHighlighted)
+        #endif
     }
 
     /// Toggle the microphone between on and off
@@ -32,10 +39,18 @@ extension AgoraVideoViewer {
         guard let micButton = self.getMicButton() else {
             return
         }
+        #if os(iOS)
         micButton.isSelected.toggle()
         micButton.backgroundColor = micButton.isSelected ? .systemRed : .systemGray
         self.agkit.muteLocalAudioStream(micButton.isSelected)
         self.userVideoLookup[self.userID]?.audioMuted = micButton.isSelected
+        #else
+        micButton.isHighlighted.toggle()
+        micButton.layer?.backgroundColor = (micButton.isHighlighted ?
+                                              NSColor.systemRed : NSColor.systemGray).cgColor
+        self.agkit.muteLocalAudioStream(micButton.isHighlighted)
+        self.userVideoLookup[self.userID]?.audioMuted = micButton.isHighlighted
+        #endif
     }
 
     /// Turn on/off the 'beautify' effect. Visual and voice change.
@@ -43,15 +58,26 @@ extension AgoraVideoViewer {
         guard let beautifyButton = self.getBeautifyButton() else {
             return
         }
+        #if os(iOS)
         beautifyButton.isSelected.toggle()
         beautifyButton.backgroundColor = beautifyButton.isSelected ? .systemGreen : .systemGray
         self.agkit.setLocalVoiceChanger(beautifyButton.isSelected ? .voiceBeautyClear : .voiceChangerOff)
         self.agkit.setBeautyEffectOptions(beautifyButton.isSelected, options: self.beautyOptions)
+        #else
+        beautifyButton.isHighlighted.toggle()
+        beautifyButton.layer?.backgroundColor = (beautifyButton.isHighlighted ?
+                                                  NSColor.systemGreen : NSColor.systemGray).cgColor
+        self.agkit.setLocalVoiceChanger(beautifyButton.isHighlighted ?
+                                          .voiceBeautyClear : .voiceChangerOff)
+        self.agkit.setBeautyEffectOptions(beautifyButton.isHighlighted, options: self.beautyOptions)
+        #endif
     }
 
+    #if os(iOS)
     @objc internal func flipCamera() {
         self.agkit.switchCamera()
     }
+    #endif
 
     /// Toggle between being a host or a member of the audience.
     /// On changing to being a broadcaster, the app first checks

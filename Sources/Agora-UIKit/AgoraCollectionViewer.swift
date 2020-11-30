@@ -180,6 +180,10 @@ extension AgoraVideoViewer: MPCollectionViewDelegate, MPCollectionViewDataSource
             return
         }
         #endif
+        if self.overrideActiveSpeaker == agoraColItem.agoraVideoView?.uid {
+            self.overrideActiveSpeaker = nil
+            return
+        }
         self.overrideActiveSpeaker = agoraColItem.agoraVideoView?.uid
     }
 }

@@ -5,7 +5,7 @@
 //  Created by Max Cobb on 26/11/2020.
 //
 
-import Foundation
+import UIKit
 
 class AgoraCollectionViewer: UICollectionView {
 
@@ -85,7 +85,8 @@ extension AgoraVideoViewer: UICollectionViewDelegate, UICollectionViewDataSource
         guard let cell = cell as? AgoraCollectionItem else {
             fatalError("cell not valid")
         }
-        if newVid.uid == self.activeSpeaker {
+        let myActiveSpeaker = self.overrideActiveSpeaker ?? self.activeSpeaker
+        if newVid.uid == myActiveSpeaker {
             newVid.removeFromSuperview()
             self.backgroundVideoHolder.addSubview(newVid)
             newVid.translatesAutoresizingMaskIntoConstraints = false
@@ -110,5 +111,12 @@ extension AgoraVideoViewer: UICollectionViewDelegate, UICollectionViewDataSource
         } else {
             self.agkit.setupRemoteVideo(newVid.canvas)
         }
+    }
+
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let agoraColItem = collectionView.cellForItem(at: indexPath) as? AgoraCollectionItem else {
+            return
+        }
+        self.overrideActiveSpeaker = agoraColItem.agoraVideoView?.uid
     }
 }

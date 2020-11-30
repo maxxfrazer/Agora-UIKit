@@ -45,6 +45,14 @@ open class AgoraVideoViewer: UIView {
         }
     }
 
+    public var overrideActiveSpeaker: UInt? {
+        didSet {
+            if oldValue != overrideActiveSpeaker {
+                self.reorganiseVideos()
+            }
+        }
+    }
+
     /// Setting to zero will tell Agora to assign one for you
     lazy var userID: UInt = 0
     var connectionData: AgoraConnectionData

@@ -36,10 +36,10 @@ public class AgoraSingleVideoView: MPView {
     lazy var mutedFlag: MPView = {
         #if os(iOS)
         let muteFlag = MPButton(type: .custom)
-        muteFlag.setImage(MPImage(systemName: "mic.slash.fill", withConfiguration: MPImage.SymbolConfiguration(scale: .large)), for: .normal)
+        muteFlag.setImage(MPImage(systemName: MPButton.micSlashSymbol, withConfiguration: MPImage.SymbolConfiguration(scale: .large)), for: .normal)
         #else
         let muteFlag = MPButton()
-        muteFlag.title = "􀊳"
+        muteFlag.title = MPButton.micSlashSymbol
         #endif
         self.addSubview(muteFlag)
         muteFlag.frame = CGRect(origin: CGPoint(x: self.frame.width - 50, y: self.frame.height - 50), size: CGSize(width: 50, height: 50))
@@ -65,7 +65,7 @@ public class AgoraSingleVideoView: MPView {
         #endif
         self.canvas.view = hostingView
         self.addSubview(hostingView)
-        self.canvas.renderMode = .hidden
+        self.canvas.renderMode = .fit
         self.setupMutedFlag()
     }
 
@@ -78,12 +78,17 @@ public class AgoraSingleVideoView: MPView {
         #if os(iOS)
         backgroundView.backgroundColor = .secondarySystemBackground
         let bgButton = MPButton(type: .custom)
-        bgButton.setImage(UIImage(systemName: "person.circle", withConfiguration: UIImage.SymbolConfiguration(scale: .large)), for: .normal)
+        bgButton.setImage(
+            UIImage(
+                systemName: MPButton.personSymbol,
+                withConfiguration: UIImage.SymbolConfiguration(scale: .large)),
+            for: .normal
+        )
         #else
-        backgroundView.needsLayout = true
+        backgroundView.wantsLayer = true
         backgroundView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
         let bgButton = MPButton()
-        bgButton.title = "􀓣"
+        bgButton.title = MPButton.personSymbol
         #endif
         backgroundView.addSubview(bgButton)
 

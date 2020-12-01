@@ -46,6 +46,7 @@ extension AgoraVideoViewer {
             button.layer.cornerRadius = buttonSize / 2
             button.backgroundColor = .systemGray
             #else
+            button.isBordered = false
             button.layer?.cornerRadius = buttonSize / 2
             button.layer?.backgroundColor = NSColor.systemGray.cgColor
             #endif
@@ -79,11 +80,12 @@ extension AgoraVideoViewer {
     func getCameraButton() -> MPButton? {
         if let camButton = self.camButton { return camButton }
 
-        let button = MPButton.newToggleButton(unselected: "video", selected: "video.slash")
+        let button = MPButton.newToggleButton(unselected: MPButton.videoSymbol, selected: MPButton.videoSlashSymbol)
         #if os(iOS)
         button.addTarget(self, action: #selector(toggleCam), for: .touchUpInside)
         #else
-        button.action = #selector(toggleCam)
+        button.target = self
+        button.action = #selector(self.toggleCam)
         #endif
 
         self.camButton = button
@@ -94,11 +96,12 @@ extension AgoraVideoViewer {
         if let micButton = self.micButton { return micButton }
 
         let button = MPButton.newToggleButton(
-            unselected: "mic", selected: "mic.slash"
+            unselected: MPButton.micSymbol, selected: MPButton.micSlashSymbol
         )
         #if os(iOS)
         button.addTarget(self, action: #selector(toggleMic), for: .touchUpInside)
         #else
+        button.target = self
         button.action = #selector(toggleMic)
         #endif
 
@@ -111,7 +114,7 @@ extension AgoraVideoViewer {
         #if os(macOS)
         return nil
         #else
-        let button = MPButton.newToggleButton(unselected: "camera.rotate")
+        let button = MPButton.newToggleButton(unselected: MPButton.cameraRotateSymbol)
         button.addTarget(self, action: #selector(flipCamera), for: .touchUpInside)
 
         self.flipButton = button
@@ -122,10 +125,11 @@ extension AgoraVideoViewer {
     func getBeautifyButton() -> MPButton? {
         if let beautyButton = self.beautyButton { return beautyButton }
 
-        let button = MPButton.newToggleButton(unselected: "wand.and.stars.inverse")
+        let button = MPButton.newToggleButton(unselected: MPButton.wandSymbol)
         #if os(iOS)
         button.addTarget(self, action: #selector(toggleBeautify), for: .touchUpInside)
         #else
+        button.target = self
         button.action = #selector(toggleBeautify)
         #endif
 

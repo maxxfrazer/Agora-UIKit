@@ -44,4 +44,25 @@ internal extension MPButton {
         #endif
         return button
     }
+
+    #if os(iOS)
+    static var videoSymbol = "video"
+    static var videoSlashSymbol = "video.slash"
+    static var micSymbol = "mic"
+    static var micSlashSymbol = "mic.slash"
+    static var cameraRotateSymbol = "camera.rotate"
+    static var wandSymbol = "wand.and.stars.inverse"
+    static var personSymbol = "person.circle"
+    #else
+    static var videoSymbol = "􀍉"
+    static var videoSlashSymbol = "􀍍"
+    static var micSymbol = "􀊰"
+    static var micSlashSymbol = "􀊲"
+    static var cameraRotateSymbol = "􀌢"
+    static var wandSymbol = "􀜎"
+    static var personSymbol = "􀓣"
+    var isOn: Bool {
+        return self.state == .on
+    }
+    #endif
 }

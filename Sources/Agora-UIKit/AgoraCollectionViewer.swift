@@ -40,8 +40,7 @@ class AgoraCollectionViewer: MPCollectionView {
     init(frame: CGRect, collectionViewLayout layout: MPCollectionViewLayout) {
         super.init(frame: frame)
         self.collectionViewLayout = collectionViewLayout
-        self.wantsLayer = true
-        self.layer?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.9).cgColor
+
         self.register(AgoraCollectionItem.self,
                       forItemWithIdentifier: NSUserInterfaceItemIdentifier("collectionCell")
         )
@@ -109,7 +108,7 @@ extension AgoraVideoViewer: MPCollectionViewDelegate, MPCollectionViewDataSource
         guard let cell = collectionView.item(at: indexPath) else {
             fatalError("no item at index")
         }
-        cell.view.needsLayout = true
+        cell.view.wantsLayer = true
         cell.view.layer?.backgroundColor = NSColor.blue.withAlphaComponent(0.4).cgColor
         return cell
     }

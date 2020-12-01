@@ -27,10 +27,9 @@ extension AgoraVideoViewer {
         camButton.backgroundColor = camButton.isSelected ? .systemRed : .systemGray
         self.agkit.enableLocalVideo(!camButton.isSelected)
         #else
-        camButton.isHighlighted.toggle()
-        camButton.layer?.backgroundColor = camButton.isHighlighted ?
+        camButton.layer?.backgroundColor = camButton.isOn ?
             NSColor.systemRed.cgColor : NSColor.systemGray.cgColor
-        self.agkit.enableLocalVideo(!camButton.isHighlighted)
+        self.agkit.enableLocalVideo(!camButton.isOn)
         #endif
     }
 
@@ -45,11 +44,10 @@ extension AgoraVideoViewer {
         self.agkit.muteLocalAudioStream(micButton.isSelected)
         self.userVideoLookup[self.userID]?.audioMuted = micButton.isSelected
         #else
-        micButton.isHighlighted.toggle()
-        micButton.layer?.backgroundColor = (micButton.isHighlighted ?
+        micButton.layer?.backgroundColor = (micButton.isOn ?
                                               NSColor.systemRed : NSColor.systemGray).cgColor
-        self.agkit.muteLocalAudioStream(micButton.isHighlighted)
-        self.userVideoLookup[self.userID]?.audioMuted = micButton.isHighlighted
+        self.agkit.muteLocalAudioStream(micButton.isOn)
+        self.userVideoLookup[self.userID]?.audioMuted = micButton.isOn
         #endif
     }
 
@@ -64,12 +62,12 @@ extension AgoraVideoViewer {
         self.agkit.setLocalVoiceChanger(beautifyButton.isSelected ? .voiceBeautyClear : .voiceChangerOff)
         self.agkit.setBeautyEffectOptions(beautifyButton.isSelected, options: self.beautyOptions)
         #else
-        beautifyButton.isHighlighted.toggle()
-        beautifyButton.layer?.backgroundColor = (beautifyButton.isHighlighted ?
+
+        beautifyButton.layer?.backgroundColor = (beautifyButton.isOn ?
                                                   NSColor.systemGreen : NSColor.systemGray).cgColor
-        self.agkit.setLocalVoiceChanger(beautifyButton.isHighlighted ?
+        self.agkit.setLocalVoiceChanger(beautifyButton.isOn ?
                                           .voiceBeautyClear : .voiceChangerOff)
-        self.agkit.setBeautyEffectOptions(beautifyButton.isHighlighted, options: self.beautyOptions)
+        self.agkit.setBeautyEffectOptions(beautifyButton.isOn, options: self.beautyOptions)
         #endif
     }
 

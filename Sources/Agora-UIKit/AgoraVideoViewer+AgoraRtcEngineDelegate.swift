@@ -26,10 +26,8 @@ extension AgoraVideoViewer: AgoraRtcEngineDelegate {
         let isHost = newRole == .broadcaster
         if !isHost {
             self.userVideoLookup.removeValue(forKey: self.userID)
-        } else {
-            if self.userVideoLookup[self.userID] == nil {
-                self.addLocalVideo()
-            }
+        } else if self.userVideoLookup[self.userID] == nil {
+            self.addLocalVideo()
         }
 
         // Only show the camera options when we are a broadcaster

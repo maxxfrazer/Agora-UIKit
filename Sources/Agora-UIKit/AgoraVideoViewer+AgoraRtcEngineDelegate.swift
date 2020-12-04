@@ -101,7 +101,6 @@ extension AgoraVideoViewer: AgoraRtcEngineDelegate {
         }
     }
 
-    /// - TODO: See why this isn't called.
     open func rtcEngine(_ engine: AgoraRtcEngineKit, localAudioStateChange state: AgoraAudioLocalState, error: AgoraAudioLocalError) {
         switch state {
         case .recording, .stopped:
@@ -119,4 +118,11 @@ extension AgoraVideoViewer: AgoraRtcEngineDelegate {
         self.userVideoLookup[self.userID]?.audioMuted = muted
     }
 
+    open func rtcEngineRequestToken(_ engine: AgoraRtcEngineKit) {
+        self.delegate?.tokenDidExpire?(engine)
+    }
+
+    open func rtcEngine(_ engine: AgoraRtcEngineKit, tokenPrivilegeWillExpire token: String) {
+        self.delegate?.tokenWillExpire?(engine, tokenPrivilegeWillExpire: token)
+    }
 }

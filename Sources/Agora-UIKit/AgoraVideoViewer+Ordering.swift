@@ -10,6 +10,13 @@ import Foundation
 extension AgoraVideoViewer {
     /// Shuffle around the videos if multiple people are hosting, grid formation.
     internal func reorganiseVideos() {
+        if !Thread.isMainThread {
+            DispatchQueue.main.async {
+                self.reorganiseVideos()
+            }
+            return
+        }
+
         switch self.style {
         case .grid:
             self.organiseGrid()
@@ -22,9 +29,7 @@ extension AgoraVideoViewer {
             break
         }
     }
-    func organiseFloating() {
-        self.floatingVideoHolder.reloadData()
-    }
+
     func organiseGrid() {
         var prevView: MPView?
         if userVideoLookup.isEmpty {

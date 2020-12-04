@@ -33,7 +33,15 @@ public struct AgoraConnectionData {
     }
 }
 
+@objc public protocol AgoraVideoViewerDelegate: AnyObject {
+    @objc optional func joinedChannel(channel: String)
+    @objc optional func tokenWillExpire(_ engine: AgoraRtcEngineKit, tokenPrivilegeWillExpire token: String)
+    @objc optional func tokenDidExpire(_ engine: AgoraRtcEngineKit)
+}
+
 open class AgoraVideoViewer: MPView {
+
+    var delegate: AgoraVideoViewerDelegate?
 
     public enum Style: Equatable {
         case grid
@@ -75,7 +83,7 @@ open class AgoraVideoViewer: MPView {
         }
     }
 
-    internal var currentToken: String?{
+    internal var currentToken: String? {
         get { self.connectionData.appToken }
         set { self.connectionData.appToken = newValue }
     }

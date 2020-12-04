@@ -97,12 +97,22 @@ extension AgoraVideoViewer {
         }
     }
 
-    /// Join the Agora channel
+    /// Join the Agora channel using token stored in AgoraVideoViewer object
+    /// - Parameter channel: Channel name to join
     public func joinChannel(channel: String) {
+        self.joinChannel(channel: channel, token: self.currentToken)
+    }
+
+    /// Join the Agora channel
+    /// - Parameters:
+    ///   - channel: Channel name to join
+    ///   - token: Valid token to join the channel
+    public func joinChannel(channel: String, token: String?) {
+        self.currentToken = token
         self.setupAgoraVideo()
         self.connectionData.channel = channel
         self.agkit.joinChannel(
-            byToken: self.currentToken,
+            byToken: token,
             channelId: channel,
             info: nil, uid: self.userID
         ) { [weak self] _, uid, _ in
@@ -110,6 +120,7 @@ extension AgoraVideoViewer {
             if self?.userRole == .broadcaster {
                 self?.addLocalVideo()
             }
+            self?.delegate?.joinedChannel?(channel: channel)
         }
     }
 

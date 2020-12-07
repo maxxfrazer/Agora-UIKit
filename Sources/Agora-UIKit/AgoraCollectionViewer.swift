@@ -112,6 +112,11 @@ extension AgoraVideoViewer: MPCollectionViewDelegate, MPCollectionViewDataSource
         cell.view.layer?.backgroundColor = NSColor.blue.withAlphaComponent(0.4).cgColor
         return cell
     }
+
+    public func numberOfSections(in collectionView: NSCollectionView) -> Int {
+        return 1
+    }
+
     #else
     public func collectionView(_ collectionView: MPCollectionView, cellForItemAt indexPath: IndexPath) -> MPCollectionViewCell {
 

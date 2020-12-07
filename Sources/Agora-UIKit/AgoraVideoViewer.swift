@@ -44,7 +44,7 @@ public struct AgoraConnectionData {
 
 open class AgoraVideoViewer: MPView {
 
-    var delegate: AgoraVideoViewerDelegate?
+    public var delegate: AgoraVideoViewerDelegate?
 
     public enum Style: Equatable {
         case grid

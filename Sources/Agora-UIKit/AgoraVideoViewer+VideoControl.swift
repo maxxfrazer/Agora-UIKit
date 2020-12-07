@@ -99,15 +99,15 @@ extension AgoraVideoViewer {
 
     /// Join the Agora channel using token stored in AgoraVideoViewer object
     /// - Parameter channel: Channel name to join
-    public func joinChannel(channel: String) {
-        self.joinChannel(channel: channel, token: self.currentToken)
+    public func join(channel: String) {
+        self.join(channel: channel, with: self.currentToken)
     }
 
     /// Join the Agora channel
     /// - Parameters:
     ///   - channel: Channel name to join
     ///   - token: Valid token to join the channel
-    public func joinChannel(channel: String, token: String?) {
+    public func join(channel: String, with token: String?) {
         self.currentToken = token
         self.setupAgoraVideo()
         self.connectionData.channel = channel

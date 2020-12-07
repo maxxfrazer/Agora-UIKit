@@ -2,6 +2,8 @@
 
 Instantly integrate Agora in your own application or prototype using iOS or macOS.
 
+![floating_view.jpg](media/floating_view.jpg)
+
 ## Requirements
 
 - Device
@@ -17,7 +19,7 @@ Once you have an Agora developer account and an App ID, you're ready to use this
 
 In your iOS or macOS project, add this pod to your repository by adding a file named `Podfile`, with contents similar to this:
 
-```
+```ruby
 # Uncomment the next line to define a global platform for your project
 # platform :ios, '12.0'
 
@@ -46,3 +48,21 @@ Decide where you want to add your `AgoraVideoViewer`, and in the same file impor
 Next, create an `AgoraVideoViewer` object and frame it in your scene like you would any other `UIView` or `NSView`. The `AgoraVideoViewer` object must be provided `AgoraConnectionData` and a UIViewController/NSViewController on creation.
 
 AgoraConnectionData has two values for initialising. These are appId and appToken.
+
+An `AgoraVideoViewer` can be created like this:
+
+```swift
+let agoraView = AgoraVideoViewer(
+    connectionData: AgoraConnectionData(
+        appId: "my-app-id">,
+        appToken: "my-channel-token"
+    ),
+    viewController: self
+)
+```
+
+And to join a channel, simply call
+
+```swift
+agoraView.join(channel: "test")
+```

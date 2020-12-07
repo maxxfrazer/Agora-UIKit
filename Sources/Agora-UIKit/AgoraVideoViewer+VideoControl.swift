@@ -124,17 +124,37 @@ extension AgoraVideoViewer {
         }
     }
 
+    /// Leave channel stops all preview elements
+    /// - Parameter leaveChannelBlock: This callback indicates that a user leaves a channel, and provides the statistics of the call.
+    /// - Returns: Same return as AgoraRtcEngineKit.leaveChannel, 0 means no problem, less than 0 means there was an issue leaving
+    @discardableResult
+    public func leaveChannel(_ leaveChannelBlock: ((AgoraChannelStats) -> Void)? = nil) -> Int32 {
+        if self.connectionData.channel != nil {
+            self.connectionData.channel = nil
+        }
+        self.agkit.setupLocalVideo(nil)
+        if self.userRole == .broadcaster {
+            agkit.stopPreview()
+        }
+        self.activeSpeaker = nil
+        self.remoteUserIDs = []
+        self.userVideoLookup = [:]
+        let leaveChannelRtn = self.agkit.leaveChannel(leaveChannelBlock)
+        defer {
+            if leaveChannelRtn == 0 {
+                delegate?.leftChannel?()
+            }
+        }
+        return leaveChannelRtn
+    }
+
     public func updateToken(_ newToken: String) {
         self.currentToken = newToken
         self.agkit.renewToken(newToken)
     }
 
     public func exit() {
-        self.agkit.setupLocalVideo(nil)
-        self.agkit.leaveChannel(nil)
-        if self.userRole == .broadcaster {
-            agkit.stopPreview()
-        }
+        self.leaveChannel()
         AgoraRtcEngineKit.destroy()
     }
 }

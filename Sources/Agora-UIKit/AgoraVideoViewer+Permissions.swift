@@ -30,7 +30,7 @@ extension AgoraVideoViewer {
                 }
                 return false
             default:
-                cameraMicSessingsPopup {
+                cameraMicSettingsPopup {
                     AgoraVideoViewer.goToSettingsPage()
                 }
                 return false
@@ -47,7 +47,7 @@ extension AgoraVideoViewer {
                 }
                 return false
             default:
-                cameraMicSessingsPopup { AgoraVideoViewer.goToSettingsPage() }
+                cameraMicSettingsPopup { AgoraVideoViewer.goToSettingsPage() }
                 return false
             }
         }
@@ -87,7 +87,7 @@ extension AgoraVideoViewer {
         #endif
     }
 
-    func cameraMicSessingsPopup(successHandler: @escaping () -> Void) {
+    func cameraMicSettingsPopup(successHandler: @escaping () -> Void) {
         #if os(iOS)
         let alertView = UIAlertController(
             title: "Camera and Microphone",

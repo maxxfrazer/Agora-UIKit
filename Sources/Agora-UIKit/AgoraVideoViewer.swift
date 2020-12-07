@@ -23,18 +23,21 @@ import AgoraRtcKit
 
 /// Storing struct for holding data about the connection to Agora service
 public struct AgoraConnectionData {
+    /// Agora App ID from https://agora.io
     var appId: String
+    /// Token to be used to connect to a channel, can be nil.
     var appToken: String?
+    /// Channel the object is connected to. This cannot be set with the initialiser
     var channel: String?
-    public init(appId: String, appToken: String? = nil, channel: String? = nil) {
+    public init(appId: String, appToken: String? = nil) {
         self.appId = appId
         self.appToken = appToken
-        self.channel = channel
     }
 }
 
 @objc public protocol AgoraVideoViewerDelegate: AnyObject {
     @objc optional func joinedChannel(channel: String)
+    @objc optional func leftChannel()
     @objc optional func tokenWillExpire(_ engine: AgoraRtcEngineKit, tokenPrivilegeWillExpire token: String)
     @objc optional func tokenDidExpire(_ engine: AgoraRtcEngineKit)
 }
@@ -75,7 +78,7 @@ open class AgoraVideoViewer: MPView {
 
     /// Setting to zero will tell Agora to assign one for you
     lazy var userID: UInt = 0
-    var connectionData: AgoraConnectionData
+    internal var connectionData: AgoraConnectionData
 
     public var userRole: AgoraClientRole = .broadcaster {
         didSet {

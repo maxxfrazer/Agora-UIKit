@@ -11,6 +11,7 @@ import Agora_AppKit
 class ViewController: NSViewController {
 
     var agoraView: AgoraVideoViewer?
+    var segmentControl: NSSegmentedControl?
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -20,21 +21,44 @@ class ViewController: NSViewController {
                 appToken: <#Agora Token or nil#>
             ),
             viewController: self,
-            style: .floating
+            style: .grid
         )
+
+        agoraView.delegate = self
+
         agoraView.fills(view: self.view)
 
-        agoraView.joinChannel(channel: "test")
+
+        agoraView.join(channel: "test")
 
         self.agoraView = agoraView
+        self.view.setFrameSize(NSSize(width: 1440,height: 790))
     }
 
-    override var representedObject: Any? {
-        didSet {
-        // Update the view, if already loaded.
-        }
-    }
+    @objc func segmentedControlHit(segc: NSSegmentedControl) {
+        let segmentedStyle = [
+            AgoraVideoViewer.Style.floating,
+            AgoraVideoViewer.Style.grid
+        ][segc.indexOfSelectedItem]
 
+        self.agoraView?.style = segmentedStyle
+    }
 
 }
 
+extension ViewController: AgoraVideoViewerDelegate {
+    func joinedChannel(channel: String) {
+        return
+        if self.segmentControl != nil {
+            return
+        }
+        let newControl = NSSegmentedControl(labels: ["floating", "grid"], trackingMode: .selectOne, target: self, action: #selector(segmentedControlHit))
+        newControl.selectedSegment = self.agoraView?.style == .floating ? 0 : 1
+        self.view.addSubview(newControl)
+        newControl.translatesAutoresizingMaskIntoConstraints = false
+        [
+            newControl.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 10),
+            newControl.rightAnchor.constraint(equalTo: self.view.rightAnchor, constant: -10)
+        ].forEach { $0.isActive = true }
+    }
+}

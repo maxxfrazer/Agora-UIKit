@@ -16,13 +16,15 @@ extension AgoraVideoViewer {
             }
             return
         }
-
+        #if os(iOS)
+        self.floatingVideoHolder.reloadData()
+        #endif
         switch self.style {
         case .grid:
             self.organiseGrid()
-            self.floatingVideoHolder.reloadData()
         case .floating:
-            self.floatingVideoHolder.reloadData()
+            AgoraVideoViewer.agoraPrint(.error, message: "FLOATING NOT WORKING ON MACOS YET")
+            break
         case .custom(let orgCustom):
             // no custom setup yet
             orgCustom(self, self.userVideoLookup.enumerated(), self.userVideoLookup.count)

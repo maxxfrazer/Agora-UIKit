@@ -41,23 +41,24 @@ class AgoraCollectionViewer: MPCollectionView {
         super.init(frame: frame)
         self.collectionViewLayout = collectionViewLayout
 
-        self.register(AgoraCollectionItem.self,
-                      forItemWithIdentifier: NSUserInterfaceItemIdentifier("collectionCell")
+        self.register(
+            AgoraCollectionItem.self,
+            forItemWithIdentifier: NSUserInterfaceItemIdentifier("collectionCell")
         )
     }
     #endif
 
     convenience init() {
         let flowLayout = MPCollectionViewFlowLayout()
-        flowLayout.scrollDirection = .horizontal
         flowLayout.itemSize = CGSize(width: 100, height: 100)
-        flowLayout.minimumInteritemSpacing = AgoraCollectionViewer.cellSpacing
+        flowLayout.scrollDirection = .horizontal
         flowLayout.sectionInset = MPEdgeInsets(
             top: AgoraCollectionViewer.cellSpacing,
             left: AgoraCollectionViewer.cellSpacing,
             bottom: AgoraCollectionViewer.cellSpacing,
             right: AgoraCollectionViewer.cellSpacing
         )
+        flowLayout.minimumInteritemSpacing = AgoraCollectionViewer.cellSpacing
         self.init(frame: .zero, collectionViewLayout: flowLayout)
     }
 
@@ -85,6 +86,11 @@ class AgoraCollectionItem: MPCollectionViewCell {
     override init(nibName nibNameOrNil: NSNib.Name?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nil, bundle: nil)
     }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.wantsLayer = true
+        view.layer?.backgroundColor = NSColor.lightGray.cgColor
+    }
     #else
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -97,15 +103,10 @@ class AgoraCollectionItem: MPCollectionViewCell {
 }
 
 extension AgoraVideoViewer: MPCollectionViewDelegate, MPCollectionViewDataSource {
-    public func collectionView(_ collectionView: MPCollectionView, numberOfItemsInSection section: Int) -> Int {
-        let count = self.videosToShow.count
-        collectionView.isHidden = count == 0
-        return count
-    }
 
     #if os(macOS)
-    public func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
-        guard let cell = collectionView.item(at: indexPath) else {
+    public func collectionView(_ itemForRepresentedObjectAtcollectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
+        guard let cell = itemForRepresentedObjectAtcollectionView.item(at: indexPath) else {
             fatalError("no item at index")
         }
         cell.view.wantsLayer = true
@@ -116,6 +117,11 @@ extension AgoraVideoViewer: MPCollectionViewDelegate, MPCollectionViewDataSource
     public func numberOfSections(in collectionView: NSCollectionView) -> Int {
         return 1
     }
+    public func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
+        let count = self.videosToShow.count
+        collectionView.isHidden = count == 0
+        return count
+    }
 
     #else
     public func collectionView(_ collectionView: MPCollectionView, cellForItemAt indexPath: IndexPath) -> MPCollectionViewCell {
@@ -123,6 +129,12 @@ extension AgoraVideoViewer: MPCollectionViewDelegate, MPCollectionViewDataSource
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "collectionCell", for: indexPath) as! AgoraCollectionItem
         cell.backgroundColor = UIColor.blue.withAlphaComponent(0.4)
         return cell
+    }
+
+    public func collectionView(_ collectionView: MPCollectionView, numberOfItemsInSection section: Int) -> Int {
+        let count = self.videosToShow.count
+        collectionView.isHidden = count == 0
+        return count
     }
     #endif
 

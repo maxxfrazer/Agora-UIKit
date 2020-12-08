@@ -40,7 +40,7 @@ And then install the pods using `pod install --repo-update`
 If any of these steps are unclear, look at ["Using Cocoapods" on cocoapods.org](https://guides.cocoapods.org/using/using-cocoapods.html).
 The installation will change slightly once this pod is out of pre-release.
 
----
+## Usage
 
 Once installed, open your application `.xcworkspace` file.
 

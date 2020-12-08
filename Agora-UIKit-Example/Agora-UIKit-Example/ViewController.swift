@@ -27,7 +27,7 @@ class ViewController: UIViewController {
         self.view.backgroundColor = .tertiarySystemBackground
         agoraView.fills(view: self.view)
 
-        agoraView.joinChannel(channel: "test")
+        agoraView.join(channel: "test")
 
         self.agoraView = agoraView
 

@@ -62,7 +62,7 @@ let agoraView = AgoraVideoViewer(
 )
 ```
 
-An alternative style is `.floating`, which currently only works with iOS.
+An alternative style is `.floating`, as seen in the image above.
 
 To join a channel, simply call:
 

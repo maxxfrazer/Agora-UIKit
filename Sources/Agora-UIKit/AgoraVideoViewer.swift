@@ -179,7 +179,7 @@ open class AgoraVideoViewer: MPView {
 
     internal var userVideosForGrid: [UInt: AgoraSingleVideoView] {
         if self.style == .floating {
-            return self.userVideoLookup.filter { $0.key == (self.overrideActiveSpeaker ?? self.activeSpeaker)}
+            return self.userVideoLookup.filter { $0.key == (self.overrideActiveSpeaker ?? self.activeSpeaker ?? self.userID)}
         } else if self.style == .grid {
             return self.userVideoLookup
         } else {
@@ -235,7 +235,19 @@ open class AgoraVideoViewer: MPView {
         let remoteVideoView = AgoraSingleVideoView(uid: userId)
         self.agkit.setupRemoteVideo(remoteVideoView.canvas)
         self.userVideoLookup[userId] = remoteVideoView
+        if self.activeSpeaker == nil {
+            self.activeSpeaker = userId
+        }
         return remoteVideoView
+    }
+
+    func setRandomSpeaker() {
+        if let randomNotMe = self.userVideoLookup.keys.shuffled().filter({ $0 != self.userID }).randomElement() {
+            // active speaker has left, reassign activeSpeaker to a random member
+            self.activeSpeaker = randomNotMe
+        } else {
+            self.activeSpeaker = nil
+        }
     }
 
     func removeUserVideo(with userId: UInt) {
@@ -248,13 +260,7 @@ open class AgoraVideoViewer: MPView {
         canView.removeFromSuperview()
         self.userVideoLookup.removeValue(forKey: userId)
         if let activeSpeaker = self.activeSpeaker, activeSpeaker == userId {
-            if let randomNotMe = self.userVideoLookup.keys.shuffled().filter({ $0 != self.userID }).randomElement() {
-                // active speaker has left, reassign activeSpeaker to a random member
-                self.activeSpeaker = randomNotMe
-            } else {
-                self.activeSpeaker = nil
-            }
+            self.setRandomSpeaker()
         }
-
     }
 }

@@ -52,6 +52,8 @@ AgoraConnectionData has two values for initialising. These are appId and appToke
 An `AgoraVideoViewer` can be created like this:
 
 ```swift
+import Agora_UIKit
+
 let agoraView = AgoraVideoViewer(
     connectionData: AgoraConnectionData(
         appId: "my-app-id">,

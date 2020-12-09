@@ -58,6 +58,7 @@ public class AgoraCollectionViewer: MPCollectionView {
         )
         self.isSelectable = true
         self.allowsMultipleSelection = false
+        self.backgroundColors = [NSColor.windowBackgroundColor.withAlphaComponent(0.7)]
     }
     #endif
 
@@ -150,8 +151,6 @@ extension AgoraVideoViewer: MPCollectionViewDelegate, MPCollectionViewDataSource
     }
 
     public func collectionView(_ collectionView: MPCollectionView, didEndDisplaying cell: MPCollectionViewCell, forItemAt indexPath: IndexPath) {
-        // ok ending here
-
         guard let _ = cell as? AgoraCollectionItem else {
             fatalError("cell not valid")
         }
@@ -176,7 +175,7 @@ extension AgoraVideoViewer: MPCollectionViewDelegate, MPCollectionViewDataSource
         guard let cell = item as? AgoraCollectionItem else {
             fatalError("cell not valid")
         }
-        let myActiveSpeaker = self.overrideActiveSpeaker ?? self.activeSpeaker
+        let myActiveSpeaker = self.overrideActiveSpeaker ?? self.activeSpeaker ?? self.userID
         // grid view is taking care of active speaker
         if newVid.uid != myActiveSpeaker {
             cell.agoraVideoView = newVid

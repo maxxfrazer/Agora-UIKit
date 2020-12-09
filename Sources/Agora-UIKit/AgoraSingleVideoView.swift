@@ -89,6 +89,8 @@ public class AgoraSingleVideoView: MPView {
         backgroundView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
         let bgButton = MPButton()
         bgButton.title = MPButton.personSymbol
+        bgButton.isBordered = false
+        bgButton.isEnabled = false
         #endif
         backgroundView.addSubview(bgButton)
 

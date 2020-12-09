@@ -17,15 +17,11 @@ extension AgoraVideoViewer {
             return
         }
         self.floatingVideoHolder.reloadData()
+        self.organiseGrid()
+
         switch self.style {
-        case .grid:
-            self.organiseGrid()
-        case .floating:
-            #if os(macOS)
-            AgoraVideoViewer.agoraPrint(.error, message: "FLOATING NOT WORKING ON MACOS YET")
-            self.floatingVideoHolder.isHidden = true
-            self.style = .grid
-            #endif
+        case .grid, .floating:
+            // these two cases are taken care of from floatingVideoHolder and organiseGrid above
             break
         case .custom(let orgCustom):
             // no custom setup yet
@@ -35,121 +31,58 @@ extension AgoraVideoViewer {
     }
 
     func organiseGrid() {
-        var prevView: MPView?
-        if userVideoLookup.isEmpty {
+        if self.userVideosForGrid.isEmpty {
             return
-        } else if userVideoLookup.count == 2 {
+        } else if self.userVideosForGrid.count == 2 {
             // when there are 2 videos we display them ontop of eachother
-            for (_, videoSessionView) in userVideoLookup {
-                videoSessionView.removeFromSuperview()
+            for (idx, keyVals) in self.userVideosForGrid.enumerated() {
+                let videoSessionView = keyVals.value
                 self.backgroundVideoHolder.addSubview(videoSessionView)
-                videoSessionView.translatesAutoresizingMaskIntoConstraints = false
+//                videoSessionView.translatesAutoresizingMaskIntoConstraints = false
+                videoSessionView.frame.size = CGSize(width: backgroundVideoHolder.frame.width, height: backgroundVideoHolder.frame.height / 2)
+                videoSessionView.frame.origin = CGPoint(x: 0, y: idx == 0 ? 0 : backgroundVideoHolder.frame.height / 2)
                 #if os(iOS)
-                [
-                    // Set the width and height the same as the full area
-                    // Multiplied by the precalculated multiplier
-                    videoSessionView.widthAnchor.constraint(
-                        equalTo: self.superview!.safeAreaLayoutGuide.widthAnchor
-                    ), videoSessionView.heightAnchor.constraint(
-                        equalTo: self.superview!.safeAreaLayoutGuide.heightAnchor,
-                        multiplier: 0.5
-                    ), videoSessionView.leadingAnchor.constraint(
-                        equalTo: self.superview!.safeAreaLayoutGuide.leadingAnchor
-                    ), videoSessionView.topAnchor.constraint(
-                        equalTo: prevView?.bottomAnchor ?? self.superview!.safeAreaLayoutGuide.topAnchor
-                    )
-                ].forEach { $0.isActive = true }
+                videoSessionView.autoresizingMask = [.flexibleWidth, .flexibleHeight, .flexibleBottomMargin, .flexibleTopMargin, .flexibleLeftMargin, .flexibleRightMargin]
                 #else
-                [
-                    // Set the width and height the same as the full area
-                    // Multiplied by the precalculated multiplier
-                    videoSessionView.widthAnchor.constraint(
-                        equalTo: self.superview!.widthAnchor
-                    ), videoSessionView.heightAnchor.constraint(
-                        equalTo: self.superview!.heightAnchor,
-                        multiplier: 0.5
-                    ), videoSessionView.leadingAnchor.constraint(
-                        equalTo: self.superview!.leadingAnchor
-                    ), videoSessionView.topAnchor.constraint(
-                        equalTo: prevView?.bottomAnchor ?? self.superview!.topAnchor
-                    )
-                ].forEach { $0.isActive = true }
+                videoSessionView.autoresizingMask = [.width, .height, .maxYMargin, .minYMargin, .maxXMargin, .minXMargin]
                 #endif
-                prevView = videoSessionView
             }
             return
         }
-        let vidCounts = userVideoLookup.count
+        let vidCounts = self.userVideosForGrid.count
 
         // I'm always applying an NxN grid, so if there are 12
         // We take on a grid of 4x4 (16).
         let maxSqrt = ceil(sqrt(CGFloat(vidCounts)))
         let multDim = 1 / maxSqrt
-        for (idx, (_, videoSessionView)) in userVideoLookup.enumerated() {
-
-            // clear the constraints.
-            videoSessionView.removeFromSuperview()
+        for (idx, (_, videoSessionView)) in self.userVideosForGrid.enumerated() {
             self.backgroundVideoHolder.addSubview(videoSessionView)
-            videoSessionView.translatesAutoresizingMaskIntoConstraints = false
-            #if os(iOS)
-            [
-                // Set the width and height the same as the full area
-                // Multiplied by the precalculated multiplier
-                videoSessionView.widthAnchor.constraint(
-                    equalTo: self.superview!.safeAreaLayoutGuide.widthAnchor,
-                    multiplier: multDim
-                ), videoSessionView.heightAnchor.constraint(
-                    equalTo: self.superview!.safeAreaLayoutGuide.heightAnchor,
-                    multiplier: multDim
-                )
-            ].forEach { $0.isActive = true }
-            #else
-            [
-                // Set the width and height the same as the full area
-                // Multiplied by the precalculated multiplier
-                videoSessionView.widthAnchor.constraint(
-                    equalTo: self.superview!.widthAnchor,
-                    multiplier: multDim
-                ), videoSessionView.heightAnchor.constraint(
-                    equalTo: self.superview!.heightAnchor,
-                    multiplier: multDim
-                )
-            ].forEach { $0.isActive = true }
-            #endif
+            videoSessionView.frame.size = CGSize(width: backgroundVideoHolder.frame.width * multDim, height: backgroundVideoHolder.frame.height * multDim)
             if idx == 0 {
-                // First video in the list, so just put it at the top left
-                #if os(iOS)
-                [
-                    videoSessionView.leftAnchor.constraint(equalTo: self.superview!.safeAreaLayoutGuide.leftAnchor),
-                    videoSessionView.topAnchor.constraint(equalTo: self.superview!.safeAreaLayoutGuide.topAnchor)
-                ].forEach { $0.isActive = true }
-                #else
-                [
-                    videoSessionView.leftAnchor.constraint(equalTo: self.superview!.leftAnchor),
-                    videoSessionView.topAnchor.constraint(equalTo: self.superview!.topAnchor)
-                ].forEach { $0.isActive = true }
-                #endif
+                videoSessionView.frame.origin = .zero
             } else {
+                let posY = trunc(CGFloat(idx) / maxSqrt) * ((1 - multDim) * backgroundVideoHolder.frame.height)
                 if (idx % Int(maxSqrt)) == 0 {
                     // New row, so go to the far left, and align the top of this
                     // view with the bottom of the previous view.
-                    #if os(iOS)
-                    videoSessionView.leftAnchor.constraint(
-                        equalTo: self.superview!.safeAreaLayoutGuide.leftAnchor
-                    ).isActive = true
-                    #else
-                    videoSessionView.leftAnchor.constraint(
-                        equalTo: self.superview!.leftAnchor
-                    ).isActive = true
-                    #endif
-                    videoSessionView.topAnchor.constraint(equalTo: prevView!.bottomAnchor).isActive = true
+                    videoSessionView.frame.origin = CGPoint(x: 0, y: posY)
                 } else {
                     // Go to the end of current row
-                    videoSessionView.leftAnchor.constraint(equalTo: prevView!.rightAnchor).isActive = true
-                    videoSessionView.topAnchor.constraint(equalTo: prevView!.topAnchor).isActive = true
+                    videoSessionView.frame.origin = CGPoint(
+                        x: CGFloat(idx % Int(maxSqrt)) / maxSqrt * backgroundVideoHolder.frame.width,
+                        y: posY
+                    )
                 }
             }
-            prevView = videoSessionView
+            #if os(iOS)
+            videoSessionView.autoresizingMask = [
+                .flexibleLeftMargin, .flexibleRightMargin,
+                .flexibleTopMargin, .flexibleBottomMargin,
+                .flexibleWidth, .flexibleHeight
+            ]
+            #else
+            videoSessionView.autoresizingMask = [.width, .height, .maxYMargin, .minYMargin, .maxXMargin, .minXMargin]
+            #endif
         }
     }
 }

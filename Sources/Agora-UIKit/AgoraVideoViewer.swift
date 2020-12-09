@@ -95,6 +95,8 @@ open class AgoraVideoViewer: MPView {
 
         let collView = AgoraCollectionViewer()
         self.addSubview(collView)
+        collView.delegate = self
+        collView.dataSource = self
         collView.translatesAutoresizingMaskIntoConstraints = false
         #if os(macOS)
         [
@@ -113,8 +115,6 @@ open class AgoraVideoViewer: MPView {
         ].forEach { $0.isActive = true }
         self.bringSubviewToFront(collView)
         #endif
-        collView.delegate = self
-        collView.dataSource = self
         return collView
     }()
 
@@ -122,15 +122,18 @@ open class AgoraVideoViewer: MPView {
         let rtnView = MPView()
         #if os(macOS)
         self.addSubview(rtnView, positioned: .below, relativeTo: nil)
+        rtnView.wantsLayer = true
+        rtnView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
         #else
         self.addSubview(rtnView)
         self.sendSubviewToBack(rtnView)
         #endif
-        rtnView.translatesAutoresizingMaskIntoConstraints = false
-        [
-            rtnView.widthAnchor.constraint(equalTo: self.widthAnchor),
-            rtnView.heightAnchor.constraint(equalTo: self.heightAnchor)
-        ].forEach { $0.isActive = true }
+        rtnView.frame = self.bounds
+        #if os(macOS)
+        rtnView.autoresizingMask = [.width, .height]
+        #else
+        rtnView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        #endif
         return rtnView
     }()
 
@@ -167,15 +170,20 @@ open class AgoraVideoViewer: MPView {
     }
 
 
-    lazy var videoView: MPView = {
-        let vview = MPView()
-        vview.translatesAutoresizingMaskIntoConstraints = false
-        return vview
-    }()
 
     internal var userVideoLookup: [UInt: AgoraSingleVideoView] = [:] {
         didSet {
             reorganiseVideos()
+        }
+    }
+
+    internal var userVideosForGrid: [UInt: AgoraSingleVideoView] {
+        if self.style == .floating {
+            return self.userVideoLookup.filter { $0.key == (self.overrideActiveSpeaker ?? self.activeSpeaker)}
+        } else if self.style == .grid {
+            return self.userVideoLookup
+        } else {
+            return [:]
         }
     }
 
